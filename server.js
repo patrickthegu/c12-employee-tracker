@@ -9,8 +9,6 @@ const add = require('./utils/add');
 const update = require('./utils/update');
 // const remove = require('./utils/remove');
 
-const PORT = process.env.PORT || 3001;
-const app = express();
 
 // Connect mysql2
 const db = mysql.createConnection(
@@ -18,16 +16,22 @@ const db = mysql.createConnection(
         host: "localhost",
         user: "root",
         password: "p@ssword",
-        database: "employee_db"
+        database: "employees_db"
     },
-    console.log(`connected to employee database`)
 );
 
 
 // Questions on start
 
-const startQuestions = [
-    {
+
+// db.connect(function(err) {
+//     if (err) throw err;
+//     console.log ("Connected");
+// });
+
+// Init function prompts user with options to choose from and executes their associated functions
+async function init() {
+    await inquirer.prompt([{
         type: "list",
         name: "options",
         message: "Select one of the following options",
@@ -39,53 +43,46 @@ const startQuestions = [
             "add a role",
             "add an employee",
             "update an employee",
-            "EXIT"
+            "exit"
         ]  
-    }
-];
-
-db.connect(function(err) {
-    if (err) throw err;
-    console.log (err);
-});
-
-// Init function prompts user with options to choose from and executes their associated functions
-function init() {
-    inquirer.prompt(startQuestions)
+    }])
     .then((answer) => {
+        // console.log(answer);
         switch(answer.options){
         case "view all departments":
-            console.table(view.departments(db));
-            init();
+            console.log("Hello");
+            console.log(view.departments(db));
+            // init();
             break;
         case "view all roles":
             console.table(view.roles(db));
-            init();
+            // init();
             break;
         case "view all employees":
             console.table(view.employees(db));
-            init();
+            // init();
             break;
         case "add a department":
             add.department(db);
-            init();
+            // init();
             break;    
         case "add a role":
             add.role(db);
-            init();
+            // init();
             break;
         case "add an employee":
             add.employee(db);
-            init();
+            // init();
             break;    
         case "update an employee":
             update.employee(db);
-            init();
+            // init();
             break;
-        case "EXIT":
-            db.end();
+        case "exit":
+            console.table(view.departments(db));
             break;
-    }})
+    }
+    })
 };
 
-init();
+init ();
