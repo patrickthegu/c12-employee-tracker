@@ -3,13 +3,13 @@ CREATE DATABASE employees_db;
 USE employees_db;
 
 CREATE TABLE departments (
-    id INTEGER NOT NULL AUTO_INCREMENT,
+    id INTEGER AUTO_INCREMENT,
     departments_name VARCHAR (30) UNIQUE NOT NULL,
     PRIMARY KEY (id)
 );
 
 CREATE TABLE roles (
-    id INTEGER NOT NULL AUTO_INCREMENT,
+    id INTEGER AUTO_INCREMENT,
     title VARCHAR (30) UNIQUE NOT NULL,
     salary DECIMAL (10,2) NOT NULL,
     departments_id INTEGER,
@@ -20,11 +20,11 @@ CREATE TABLE roles (
 );
 
 CREATE TABLE employees (
-    id INTEGER NOT NULL AUTO_INCREMENT,
+    id INTEGER AUTO_INCREMENT,
     first_name VARCHAR (30),
     last_name VARCHAR (30),
     roles_id INTEGER,
-    managers_id INTEGER NULL,
+    managers_id INTEGER,
     PRIMARY KEY (id),
     FOREIGN KEY (roles_id)
     REFERENCES roles (id)

@@ -1,10 +1,11 @@
 const inquirer = require('inquirer');
-const view = require('./view');
+const cTable = require('console.table');
 
 
 
-function department (db) {
-    inquirer.prompt([
+async function department (db, init) {
+    console.log('\n');
+   await inquirer.prompt([
             {
                 type: "input",
                 name: "newDepartment",
@@ -18,21 +19,21 @@ function department (db) {
                 }
             }
         ])
-    .then ((answer) => {
-        let query = "INSERT INTO departments (department_name) VALUES (?)";
+    .then (answer => {
+        let query = "INSERT INTO departments (departments_name) VALUES (?)";
+        console.log(answer.newDepartment);
         db.query(query, answer.newDepartment, (err, results) => {
             if (err) throw err;
             console.log(`${answer.newDepartment} has been added`);
-
-            console.table(view.departments(db));
+            init();
         })
     });
 };
 
 
-
-function role (db) {
-    inquirer.prompt([
+async function role (db, init) {
+    console.log('\n');
+    await inquirer.prompt([
         {
             type: "input",
             name: "title",
@@ -46,41 +47,50 @@ function role (db) {
             }
         },
         {
-            type: "input",
+            type: "number",
             name: "salary",
             message: "what is the salary of the new role?",
             validate: answer => {
-                if (Number.isInteger(answer)){
+                if (!isNaN(answer)){
                 return true
                 }else{
                     return "enter a valid salary";
                 }
             }
         },
-        {
-            type: "list",
-            name: "department_id",
-            message: "which department is this role in",
-            choices: view.departments(db)
-        }
     ])
     .then ((answer) => {
-        console.log(answer.department);
-        let newRole = {};
-        newRole.title = answer.title;
-        newRole.salary = answer.salary;
-        newRole.department_id = answer.department_id[0];
-        let query = "INSERT INTO roles SET ?"
-        db.query(query, newRole, (err, results) => {
+        const newRole = [answer.title, answer.salary];
+
+        db.query("SELECT * FROM departments", (err, results) => {
             if (err) throw err;
-            console.log(`${answer.title} has been added`);
-        })
+            const departmentChoices = (results.map(({id, departments_name}) => ({name: departments_name, value: id})));    
         
-    })
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "department_id",
+                    message: "which department is this role?",
+                    choices: departmentChoices
+                }
+            ])
+            .then((answer) => {
+                const department_id = answer.department_id;
+                newRole.push(department_id);
+
+                let query = "INSERT INTO roles (title, salary, departments_id) VALUES (?, ?, ?) "
+                db.query(query, newRole, (err, results) => {
+                if (err) throw err;
+                console.log(`${newRole[0]} has been added`);
+                init();
+                });
+            });
+        });            
+    });
 };
 
-function employee (db) {
-    inquirer.prompt([
+async function employee (db, init) {
+    await inquirer.prompt([
         {
             type: "input",
             name: "first_name",
@@ -104,30 +114,54 @@ function employee (db) {
                     return true;
                 }
             }
-        },
-        {
-            type: "list",
-            name: "role_id",
-            message: "select role of new employee",
-            choices: view.roles(db)
-        },
-        {
-            type: "list",
-            name: "manager",
-            message: "what is new employees manager's id",
-            choices: function () {
-                let managerList = db.query ("SELECT id, first_name, Last_name FROM employees WHERE managers_id = NULL ORDER BY employees.id ASC")
-                return managerList;
-            }
         }
     ])
     .then((answer) => {
-        console.log (answer.role_id);
-        let newEmployee = {};
-        newEmployee.first_name = answer.first_name;
-        newEmployee.last_name = answer.last_name;
-        newEmployee.role_id = answer.role_id[0];
-        newEmployee.manager_id = answer.manager[0];
+        const newEmployee = [answer.first_name, answer.last_name];
+
+        db.query("SELECT id, title FROM roles", (err, results) => {
+            if (err) throw err;
+            const roleChoices = (results.map(({id, title}) => ({name: title, value: id})));
+       
+            inquirer.prompt([
+                {
+                    type: "list",
+                    name: "role_id",
+                        message: "select role of new employee",
+                choices: roleChoices
+                }
+            ])
+            .then(answer => {
+                const role_id = answer.role_id;
+                newEmployee.push(role_id);
+
+                db.query("SELECT * FROM employees WHERE managers_id IS NULL", (err, results) => {
+                    if (err) throw err;
+                    const managerChoices = results.map(({id, first_name, last_name}) => ({ name: first_name + " " + last_name, value: id}));
+
+                    inquirer.prompt([
+                        {
+                            type: "list",
+                            name: "manager",
+                            message: "what is new employees manager's id",
+                            choices: managerChoices
+                        }
+                    ])
+                    .then(answer => {
+                        const managers_id = answer.manager;
+                        newEmployee.push(managers_id);
+
+                        let query = "INSERT INTO employees (first_name, last_name, roles_id, managers_id) VALUES (?, ?, ?, ?)";
+                        db.query(query, newEmployee, (err, results) => {
+                            if (err) throw err;
+                            console.log(`${newEmployee[0]} ${newEmployee[1]} has been added`);
+                            init();
+                        });
+                    })
+                });
+            });
+        });
+        
     })
 };
 

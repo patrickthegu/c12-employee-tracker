@@ -14,6 +14,7 @@ const update = require('./utils/update');
 const db = mysql.createConnection(
     {
         host: "localhost",
+        port: 3306,
         user: "root",
         password: "p@ssword",
         database: "employees_db"
@@ -47,42 +48,65 @@ async function init() {
         ]  
     }])
     .then((answer) => {
-        // console.log(answer);
         switch(answer.options){
         case "view all departments":
-            console.log("Hello");
-            console.log(view.departments(db));
-            // init();
+            view.departments(db, init);
             break;
         case "view all roles":
-            console.table(view.roles(db));
-            // init();
+            view.roles(db, init);
             break;
         case "view all employees":
-            console.table(view.employees(db));
-            // init();
+            view.employees(db, init);
             break;
         case "add a department":
-            add.department(db);
-            // init();
+            add.department(db, init);
             break;    
         case "add a role":
-            add.role(db);
-            // init();
+            add.role(db, init);
             break;
         case "add an employee":
-            add.employee(db);
-            // init();
+            add.employee(db, init);
             break;    
         case "update an employee":
-            update.employee(db);
-            // init();
+            update.employee(db, init);
             break;
         case "exit":
-            console.table(view.departments(db));
+            db.end();
             break;
     }
     })
 };
 
 init ();
+
+// View Functions
+// function to view employees 
+function employees (db) {
+    let query = "SELECT * from employees";
+    // "SELECT employees.id, employees.first_name, employees.last_name, roles.title, departments.department_name AS 'departments', roles.salary FROM employees, roles, departments WHERE departments.id = roles.department_id AND roles.id = employees.roles_id ORDER BY employees.id ASC";
+    db.query(query, function (err, results){
+        if (err) throw err;
+        console.log('\n');
+        console.table(results);
+    });
+};
+
+// function to view all department names and ids
+function departments (db) {
+    let query = "SELECT * FROM departments";
+    db.query(query, (err, results) => {
+        if (err) throw err;
+        console.log('\n')
+        console.table(results);
+    });
+};
+
+// function to view all roles, showing job title, role id, department and Salary
+function roles (db) {
+    let query = "SELECT * FROM roles";
+    db.query(query, (err, results) => {
+        if (err) throw err;
+        console.log('\n');
+        console.table(results);
+    });
+};
