@@ -1,11 +1,13 @@
 const inquirer = require('inquirer');
 
+// Function to update employee
 function employee (db, init) {
+    // View employees to create choices
     db.query("SELECT * FROM employees", (err, results) => {
         if (err) throw err;
 
         const employeesChoices = results.map(({id, first_name, last_name}) => ({ name: first_name + " " + last_name, value: id}));
-
+        // Ask which employee to update in terminal
         inquirer.prompt([
             {
                 type: "list",
@@ -14,6 +16,7 @@ function employee (db, init) {
                 choices: employeesChoices
             }
         ])
+        // Select new Role of employee and update
         .then(answer => {
             const updatedData = [];
             updatedData.push(answer.updateEmployee);
@@ -31,7 +34,6 @@ function employee (db, init) {
                 ])
                 .then(answer => {
                     updatedData.unshift(answer.role_id);
-                    console.log(updatedData);
                     db.query("UPDATE employees SET roles_id = ? WHERE id = ?", updatedData, (err, results) => {
                         if (err) throw err;
                         console.log (`Employee updated`);

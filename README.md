@@ -19,7 +19,7 @@
 
 A command line application that allows a user to access, add and update an employee database of a company.
 
-accessible through Github and Heroku
+accessible through Github
 
 https://github.com/patrickthegu/c12-employee-tracker
 
@@ -27,15 +27,21 @@ https://github.com/patrickthegu/c12-employee-tracker
 ## Installation Instructions
 
 Download from Github and navigate to directory
-log into mysql
-run schema
-run seeds
-run npm i to install dependencies
-run npm start
+Download from Github
 
-alternately access from Heroku Link
+Navigate to folder in terminal
+
+Using `mysql -u root -p` log into mysql and run schema and seeds
+
+Exit mysql
+
+Run npm i
+
+[Screenrecording](./screenrecording.mp4)
 
 ## Usage Instructions
+
+Run npm start
 
 Follow command line prompts
 

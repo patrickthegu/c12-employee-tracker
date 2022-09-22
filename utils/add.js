@@ -2,7 +2,7 @@ const inquirer = require('inquirer');
 const cTable = require('console.table');
 
 
-
+// Function to add new department
 async function department (db, init) {
     console.log('\n');
    await inquirer.prompt([
@@ -21,7 +21,6 @@ async function department (db, init) {
         ])
     .then (answer => {
         let query = "INSERT INTO departments (departments_name) VALUES (?)";
-        console.log(answer.newDepartment);
         db.query(query, answer.newDepartment, (err, results) => {
             if (err) throw err;
             console.log(`${answer.newDepartment} has been added`);
